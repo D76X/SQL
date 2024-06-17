@@ -13,6 +13,37 @@ Database Properties:
 -3 Statistic Properties: 
 -4 Delayed durability:
 -5 Query store status: enabled / disabled
+
+- database owner should be SA and not an individual login
+- [log reuse wait description]
+  and 
+  [log used %] 
+  are important to regularly monitor whether there are RUNAWAY TRANSACTIONS!
+
+- Moreover [log reuse wait description] (LRWD) tells you WHY the log does not clear
+- the [Compatibility Level] (CL) is important due to the New [Cardinality Estimator] (CARDE)
+- [Statistics Properties] (STATP) are very important for [Query Performance] (QPERF)
+- [Isolation Level Propertis] paly an important role in CUNCURRENCY+LOCKING+BLOCKING issues > (CLB) issues
+
+The following should be checked as a standard and those with asterisks are very important:
+Recovery Model 
+State 
+LRWD* (Log Reuse Wait Description)
+DB CL (Compatibility Level)
+Page Verify Option
+IS AUTO UDATE STATS ASYNC ON
+IS PARAMETERIZATION FORCE
+SNAPSHOT ISOLATION STATE
+READ COMMITED SNAPSHOT ISOLATION
+AUTO CLOSE
+AUTO SHRINK
+TARGET RECOVERY TIME
+CDC ENABLED
+DELAYED DURABILITY
+IS QUERY STORE ENABLED
+RESULT SET CACHING
+ACCELLERATED DB RECOVERY
+TEMP DB SPILL TO REMOTE STORE
 */
 -- Important database properties for current database   (Query 1) (Database Properties)
 SELECT db.[name] AS [Database Name], db.recovery_model_desc AS [Recovery Model], 
@@ -31,6 +62,12 @@ WHERE db.[name] <> N'master'
 ORDER BY db.[name] OPTION (RECOMPILE);
 ------
 
+/*
+File Sizes and Space
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/8a4b1502-91c6-4c6f-8d24-80bf78bff8ba/8002a406-7480-42d0-9b3f-0de295fd21fa
+
+
+*/
 -- Things to look at:
 -- What recovery model are you using?
 -- What is the log reuse wait description?
