@@ -66,6 +66,18 @@ ORDER BY db.[name] OPTION (RECOMPILE);
 File Sizes and Space
 https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/8a4b1502-91c6-4c6f-8d24-80bf78bff8ba/8002a406-7480-42d0-9b3f-0de295fd21fa
 
+- find the DB filenames and location
+- find the total size of the DB files
+- find the available space in each DB file
+- filegroup & auto growth
+- are all the files in the filegroup of the same size? > best practice
+-----------------------------------------
+- **SPOT RUNAWAY TRANSACTION LOGS** <<
+
+if the log file is not cleared then it is 
+likely there is a pending transaction that 
+prevents it.
+-----------------------------------------
 
 */
 -- Things to look at:
@@ -91,18 +103,36 @@ ON f.data_space_id = fg.data_space_id
 ORDER BY f.[file_id] OPTION (RECOMPILE);
 ------
 
--- Look at how large and how full the files are and where they are located
+/*
+DATA-SCOPED CONFIGURATIONS
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/8a4b1502-91c6-4c6f-8d24-80bf78bff8ba/5467ffbd-411b-49d7-abaf-ec16381a068e 
 
+---------------------------------------------------------------
+In Azure SQL Server you should be able to change these even at 
+DB level rather than at server level
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+MAXDOP = Maximum Degree of Parallelism at the DB level
+LCE = Legacy Carinality Estimator ?
+Parameter Sniffing ?
+QE hotfixes (Query Optimizer Hotfixes) ?
+Identity Cache for Identity Columns ?
+
+*/
+
+
+-- Look at how large and how full the files are and where they are located
 -- is_autogrow_all_files was new for SQL Server 2016. Equivalent to TF 1117 for user databases
 
 -- SQL Server 2016: Changes in default behavior for autogrow and allocations for tempdb and user databases
 -- http://bit.ly/2evRZSR
 
-
-
 -- Get database scoped configuration values for current database (Query 3) (Database-scoped Configurations)
 SELECT configuration_id, [name], [value] AS [value_for_primary]
 FROM sys.database_scoped_configurations WITH (NOLOCK) OPTION (RECOMPILE);
+
+
 ------
 
 -- This lets you see the value of these new properties for the current database
