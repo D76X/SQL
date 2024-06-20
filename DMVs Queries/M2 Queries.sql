@@ -109,7 +109,8 @@ https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0
 
 ---------------------------------------------------------------
 In Azure SQL Server you should be able to change these even at 
-DB level rather than at server level
+DB level rather than at server level. 
+These options allow you ** to control the behavior of the DB.**
 ---------------------------------------------------------------
 
 ---------------------------------------------------------------
@@ -132,9 +133,20 @@ Identity Cache for Identity Columns ?
 SELECT configuration_id, [name], [value] AS [value_for_primary]
 FROM sys.database_scoped_configurations WITH (NOLOCK) OPTION (RECOMPILE);
 
-
 ------
 
+/*
+TABLE PROPERTIES:
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/8a4b1502-91c6-4c6f-8d24-80bf78bff8ba/5fed929e-c3af-4a3e-a9ef-c45f67d28290
+
+- show useful property for each table
+- show useful property for the inde for each table
+- show the creation date for each table
+_ is a MEMORY OPTIMIZED TABLE or a TEMPORAL TABLE ?
+- the compression status for the index: page compressed | row compressed | no compression
+- ** FIND CANDIDATES FOR ROW COMPRESSION **
+
+*/
 -- This lets you see the value of these new properties for the current database
 
 -- Clear plan cache for current database
@@ -142,14 +154,6 @@ FROM sys.database_scoped_configurations WITH (NOLOCK) OPTION (RECOMPILE);
 
 -- ALTER DATABASE SCOPED CONFIGURATION (Transact-SQL)
 -- https://bit.ly/2sOH7nb
-
-
-
-
-
-
-
-
 
 -- Get some key table properties (Query 4) (Table Properties)
 SELECT OBJECT_NAME(t.[object_id]) AS [ObjectName], p.[rows] AS [Table Rows], p.index_id, 
@@ -164,6 +168,9 @@ WHERE OBJECT_NAME(t.[object_id]) NOT LIKE N'sys%'
 ORDER BY OBJECT_NAME(t.[object_id]), p.index_id OPTION (RECOMPILE);
 ------
 
+/*
+
+*/
 -- Gives you some good information about your tables
 -- is_memory_optimized and durability_desc were new in SQL Server 2014
 -- temporal_type_desc, is_remote_data_archive_enabled, is_external are new in SQL Server 2016
