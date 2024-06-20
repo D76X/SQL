@@ -170,6 +170,23 @@ ORDER BY OBJECT_NAME(t.[object_id]), p.index_id OPTION (RECOMPILE);
 
 /*
 
+QUERY STORE (QS) OPTIONS
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/8a4b1502-91c6-4c6f-8d24-80bf78bff8ba/e5c56713-9520-45f7-b5e7-7bda9a8b797b
+
+1- find out which properties of the QS are set for the current DB
+2- find out which properties of the QS for teh current DB should be enabled
+3- show the maximun storage size  (MSS)
+4- show the current storage usage (CSU)
+********************************************************************
+when you run out of QS Space the QS will chance to be READ-ONLY!
+********************************************************************
+
+5- show the QS CAPTURE MODE
+6- show the QS CLEAN UP MODE
+*******************************
+these 2 can be vey important especially with adhoc workloads!
+*******************************
+
 */
 -- Gives you some good information about your tables
 -- is_memory_optimized and durability_desc were new in SQL Server 2014
@@ -178,8 +195,12 @@ ORDER BY OBJECT_NAME(t.[object_id]), p.index_id OPTION (RECOMPILE);
 -- sys.tables (Transact-SQL)
 -- https://bit.ly/2Gk7998
 
+/*****************************
+Query Store Settings
+-- https://bit.ly/2HzOPZe
 
-
+This blog post goes into the details of Query Story.
+*****************************/
 
 -- Get QueryStore Options for this database (Query 5) (QueryStore Options)
 SELECT actual_state_desc, desired_state_desc,
@@ -189,19 +210,28 @@ SELECT actual_state_desc, desired_state_desc,
 FROM sys.database_query_store_options WITH (NOLOCK) OPTION (RECOMPILE);
 ------
 
+/*
+
+TIP-1:
+actual_state_desc:  OFF 
+desired_state_desc: OFF
+
+These should be both READ_WRITE !
+
+TIP-2:
+current_storage_size_mb: 0
+max_storage_size_mb: 100
+
+These
+
+*/
+
+
 -- Added in SQL Server 2016
 -- Requires that QueryStore is enabled for this database
 
 -- Tuning Workload Performance with Query Store
 -- https://bit.ly/1kHSl7w
-
-
-
-
-
-
-
-
 
 -- Get database automatic tuning options (Query 6) (Automatic Tuning Options)
 SELECT [name], desired_state_desc, actual_state_desc, reason_desc
