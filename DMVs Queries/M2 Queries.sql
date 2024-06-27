@@ -211,6 +211,13 @@ FROM sys.database_query_store_options WITH (NOLOCK) OPTION (RECOMPILE);
 ------
 
 /*
+AUTOMATIC TUNING OPTIONS:
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/8a4b1502-91c6-4c6f-8d24-80bf78bff8ba/76f3b9ed-9476-40a6-b65e-31243fcfa161
+
+
+*/
+
+/*
 
 TIP-1:
 actual_state_desc:  OFF 
