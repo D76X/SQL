@@ -214,6 +214,29 @@ FROM sys.database_query_store_options WITH (NOLOCK) OPTION (RECOMPILE);
 AUTOMATIC TUNING OPTIONS:
 https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/8a4b1502-91c6-4c6f-8d24-80bf78bff8ba/76f3b9ed-9476-40a6-b65e-31243fcfa161
 
+-1 find out the available Automatic Tuning Options (ATO) on the SQL Server
+-2 show the DESIRED STATE and ACTUAL STATE for each ATO
+-3 find out the reason why (DESIRED STATE != ACTUAL STATE) for each ATO
+-4** there are more AUTOMATIC INDEX TUNING options in Azure SQL Server than in any on-premise version
+-5 ATO **must** have Query Store (QS) running in order to work as it relies on it
+-6 ATO eliminates PERFORMANCE REGRESSION (PERFREG) due to QUERY PLAN INSTABILITY (QPI) because 
+   if SQL server cannot figure out the QP then it uses the last available which may be not suitable
+   after qury updates
+-7 AUTOMATES PLAN FORCING [PF] that you would do manually otherwise
+
+-4**
+
+This is the only ATO that is found on-premise 
+---------------------------------------------------------------------------------------
+name					desired_state_desc	actual_state_desc	reason_desc
+FORCE_LAST_GOOD_PLAN	DEFAULT				OFF					AUTO_CONFIGURED
+---------------------------------------------------------------------------------------
+
+on Azure SQL Server there are at least 3 more!
+
+CREATE_INDEX
+DROP_INDEX
+MAINTAIN_INDEX
 
 */
 
@@ -244,11 +267,11 @@ These
 SELECT [name], desired_state_desc, actual_state_desc, reason_desc
 FROM sys.database_automatic_tuning_options WITH (NOLOCK)
 OPTION (RECOMPILE);
+
 ------ 
 
 -- sys.database_automatic_tuning_options (Transact-SQL)
 -- https://bit.ly/2FHhLkL
-
 
 -- Examples of automatic tuning commands
 
@@ -258,24 +281,17 @@ ALTER DATABASE CURRENT SET AUTOMATIC_TUNING (FORCE_LAST_GOOD_PLAN = ON);
 -- Disable FORCE_LAST_GOOD_PLAN
 ALTER DATABASE CURRENT SET AUTOMATIC_TUNING (FORCE_LAST_GOOD_PLAN = OFF);
 
-
 -- Enable CREATE_INDEX
 ALTER DATABASE CURRENT SET AUTOMATIC_TUNING (CREATE_INDEX = ON); 
 
 -- Disable CREATE_INDEX
 ALTER DATABASE CURRENT SET AUTOMATIC_TUNING (CREATE_INDEX = OFF); 
 
-
 -- Enable DROP_INDEX
 ALTER DATABASE CURRENT SET AUTOMATIC_TUNING (DROP_INDEX = ON);
 
 -- Disable DROP_INDEX
 ALTER DATABASE CURRENT SET AUTOMATIC_TUNING (DROP_INDEX = OFF); 
-
-
-
-
-
 
 -- Enable MAINTAIN_INDEX (does not work in SSMS 18.2)
 ALTER DATABASE CURRENT SET AUTOMATIC_TUNING (MAINTAIN_INDEX = ON); 
