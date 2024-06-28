@@ -1,8 +1,28 @@
--- M3 - CPU-related Queries ***********************************************************************
--- Glenn Berry
+/*
+***********************************************************************
+M3 - CPU-related Queries 
+***********************************************************************
+*/
 
+/*
+
+CPU Utilization by DB
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/3c000b9e-3ab1-4aae-b186-14e76ee78d9e/c38737cf-edc0-445b-ad11-ee7bafd4bfca
+
+-1 help focus analysis if server is under CPU pressure
+-2 find out shich DB on the server uses the most CPU
+-3 more detailed analysis by top CPU queries and store procedures
+-4 query and index tuning can be used to reduce CPU untilization 
+
+The CPU% are the values of CPU utilization calculated on the basis of 
+the query that are currently in the Query Plan Cache (QPC).
+--------------------------------------------------------------------------
+Therefore, if the QPC is cleared then thses figures will be lost!
+--------------------------------------------------------------------------
+*/
 
 -- Get CPU utilization by database (Query 1) (CPU Usage by Database)
+
 WITH DB_CPU_Stats
 AS
 (SELECT pa.DatabaseID, DB_Name(pa.DatabaseID) AS [Database Name], 
@@ -19,12 +39,36 @@ FROM DB_CPU_Stats
 WHERE DatabaseID <> 32767 -- ResourceDB
 AND NOT [Database Name] IS NULL 
 ORDER BY [CPU Rank] OPTION (RECOMPILE);
+
 ------
+
+/*
+
+TOP WORKER TIME QUERIES
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/3c000b9e-3ab1-4aae-b186-14e76ee78d9e/df6d6ea6-2dbe-4194-b13c-756eef215d01
+
+-1 it showas all the Queries including SP ordered by WORKER TIME (WT)
+-2 WORKER TIME (WT) is linked to CPU Utilization
+-------------------------------------------------
+-3 The typical workflow: 
+- use the CPUU% query to find which DB has the largest value
+- in the DB under that largest CPUU% use the WT query to find the query or queries that causes the largest share of the CPU Pressure
+- in all normal cases the WT falls off quickly that is ony the TOP-N queries will be responsible for the high CPUU% on the DB
+-------------------------------------------------
+
+***************************
+-4 **Has Missing Index**
+***************************
+The queries that have a value = 1 in this column refer to query that cannot be optimized as they lack an Index!
+
+-5 examine the WT TOP-N Queries and determine what you cabn do to improve thier perfomrance by tuning them
+-6 nomrallu **Query & Index Tuning** are the most effective way to improve the Performance of a Query
+
+-7 all the columns with **Elapsed Time** are in Micorseconds!
+*/
 
 -- Helps determine which database is using the most CPU resources on the instance
 -- Note: This only reflects CPU usage from the currently cached query plans
-
-
 
 -- Get top total worker time queries for this database (Query 2) (Top Worker Time Queries)		
 SELECT TOP(50) DB_NAME(t.[dbid]) AS [Database Name], 
@@ -48,12 +92,22 @@ CROSS APPLY sys.dm_exec_sql_text(plan_handle) AS t
 CROSS APPLY sys.dm_exec_query_plan(plan_handle) AS qp
 WHERE t.dbid = DB_ID() 
 ORDER BY qs.total_worker_time DESC OPTION (RECOMPILE);
-------
+
+----------------------------------------------------------------------------------------------------
+
+/*
+
+SP Worker Time
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/3c000b9e-3ab1-4aae-b186-14e76ee78d9e/bff24f25-8709-4f07-9b3e-d23b70f8445c
+
+-1 This is the same as above for the SPs on a specific DB
+-2 all that was said earlier holds valid also in this case
+-3 in this case use **AvgWoerkerTime** to identify the SPs that may require some Index & Performance Tuning
+-4 Look at the Graphical Execition Plan (GEP) to understand which parts of the SP should be optimized first
+*/
 
 -- Helps you find the most expensive queries from a CPU perspective for this database
 -- Can also help track down parameter sniffing issues
-
-
 
 -- Top Cached SPs By Total Worker time. Worker time relates to CPU cost  (Query 3) (SP Worker Time)
 SELECT TOP(25) p.name AS [SP Name], qs.total_worker_time AS [TotalWorkerTime], 
@@ -71,7 +125,13 @@ CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp
 WHERE qs.database_id = DB_ID()
 AND DATEDIFF(Minute, qs.cached_time, GETDATE()) > 0
 ORDER BY qs.total_worker_time DESC OPTION (RECOMPILE);
-------
+
+---------------------------------------------------------------------------------------------------------------
+
+/*
+HIGH AGGREAGTE CPU QUERIES
+
+*/
 
 -- This helps you find the most expensive cached stored procedures from a CPU perspective
 -- You should look at this if you see signs of CPU pressure
