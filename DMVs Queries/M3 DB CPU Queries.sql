@@ -4,6 +4,10 @@ M3 - CPU-related Queries
 ***********************************************************************
 */
 
+-- some queries are DB-specific
+USE AxDB 
+GO
+
 /*
 
 CPU Utilization by DB
@@ -130,7 +134,21 @@ ORDER BY qs.total_worker_time DESC OPTION (RECOMPILE);
 
 /*
 HIGH AGGREAGTE CPU QUERIES
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/3c000b9e-3ab1-4aae-b186-14e76ee78d9e/fca557f6-7327-43ce-a5d0-0aca0ae8b081
 
+-1 these queries are DB-specific  
+-2 rely on QS being enabled!
+-3 make sure that the QS is not in a READ-ONLY state because these queries will not provide accurate results in this case!
+-4 show the HIGHEST AGGREAGET CPU Queries OVER THE LAST HOUR
+-5 this is useful to diagnose the situations when the re is CPU Pressure and there has been a recent development on teh DB that amy have caused it
+-6 IT IS POSSIBLE TO ALTER THE TIME RANGE from 1h to whatever makes sense in your user case
+-7 it shows the queries SQL
+-8 it shows the queries plans
+------------------------------------------------------------------------------------------------------
+-9 it shows the queries plans counts => if the counts is HIGH THERE MIGHT BE A QP STABILITY ISSUE!
+------------------------------------------------------------------------------------------------------
+-10  it shows whether particular queries or SPs have a FORCED PLAN!
+------------------------------------------------------------------------------------------------------
 */
 
 -- This helps you find the most expensive cached stored procedures from a CPU perspective
