@@ -1,5 +1,45 @@
--- M4 - Activity-related Queries ***********************************************************************
--- Glenn Berry
+/*
+***********************************************************************
+M4 - Activity-related Queries
+***********************************************************************
+*/
+
+------------------------------------------------------------------------------------------------
+/*
+Lock Waits
+
+-1 show all the Tables and Indexes that have Lock Waites (LW) on them
+-2 LWs are useful in scenario in conjuction with very high Average Task Counts ([A]TCs)
+-3 the [A]TCs on Azure DBs can be very differnt from that of on-prem and it depends strogly on the Service Tier (DB-ST)
+-4 show Page Lock Waits (PLWs)
+-5 show Row Lock Waits  (RLWs)
+-6 show the Cumulative Waits **since the last restart** (CWs)
+-7 the technical improvement technique in these cases ins Index Tuning (IdxTun) which is effective in reducing LWs
+
+-8 look for Tables &/or Rows that have **very high LWs**
+---------------------------------------------------------------
+-9 focus on HLWs on the **Cluster Index** of any table!
+
+COUNTERMEASURE-1
+
+when a HLW is detected on the CI of a table one way to reduce the LW
+is to add useful Non-Clustered Indexes (NCIs) to the same table.
+This works because any additional useful NCI can AVOID a CI scan in 
+the query plans!
+
+COUNTERMEASURE-2
+
+DROP any unused Indexes on any Table because unused Indexes are scanned
+by the DB engine and can cause HLWs.
+
+COUNTERMEASURE-3
+
+Set the proper ISOLATION LEVEL PROPERTIES on the DB ot reduce 
+cuncurrency
+---------------------------------------------------------------
+
+
+*/
 
 -- Get lock waits for current database (Query 1) (Lock Waits)
 SELECT o.name AS [table_name], i.name AS [index_name], ios.index_id, ios.partition_number,
