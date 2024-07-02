@@ -34,9 +34,23 @@ by the DB engine and can cause HLWs.
 
 COUNTERMEASURE-3
 
-Set the proper ISOLATION LEVEL PROPERTIES on the DB ot reduce 
-cuncurrency
+Set the proper ISOLATION LEVEL PROPERTIES on the DB to reduce concurrency i.e.
+use READ COMMIT SNAPSHOT ISOLATION
+
+Azure SQL Database – The Default Isolation Is?
+https://blobeater.blog/2018/05/30/azure-sql-database-the-default-isolation-is/ 
+
+Azure SQL Database: Non-blocking transactions
+https://learn.microsoft.com/en-us/shows/azure-friday/azure-sql-database-non-blocking-transactions
+
 ---------------------------------------------------------------
+
+*/
+
+---------------------------------------------------------------
+
+/*
+Lock Waits for the current DB
 
 
 */
