@@ -72,13 +72,31 @@ SCALER UDF STATS
 https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/6ff91716-89f2-4f84-8b81-d543dd63c4cb
 
 - Scaler UDF are known to cause performance problems for SQL Server ( especially SQL Server 2017 and eralier!)
+- SUDF often prevent queries to be executed in parallel!
 - for the current DB show the most CPU intensive Scaler User Defined Functions
-
+------------------------------
+- IMPROVEMENT-STRATEGY-1: 
+one way to improve the performance cause by Scaler UDF is to try to INLINE the code of the SUDF in the query, if possible
+------------------------------
+- SQL Server 2019 AUTOMATICALLY inlines SUDF code to address the known problem (in compatibility level 150)
+- Azure SQL Server may do the same but I am not sure
+------------------------------
+- IMPROVEMENT-STRATEGY-2:
+Convert the SUDF to a Table-Valued UDF (TV-UDF) that returns a 1-row-1col table!
+------------------------------
+- IMPROVEMENT-STRATEGY-3:
+Convert the SUDF to an equivalent T-SQL SP
+------------------------------
 */
 
+-------------------------------------
+-- UDF Statistics for the current DB
+-- Helps you investigate scalar UDF performance issues
+-- sys.dm_exec_function_stats (Transact-SQL)
+-- https://bit.ly/2q1Q6BM
+-------------------------------------
 -- This query is helpful for troubleshooting blocking and deadlocking issues
 -- Look at UDF execution statistics (Query 2) (UDF Statistics)
-
 SELECT OBJECT_NAME(object_id) AS [Function Name], total_worker_time,
        execution_count, total_elapsed_time,  
        total_elapsed_time/execution_count AS [avg_elapsed_time],  
@@ -88,17 +106,19 @@ WHERE database_id = DB_ID()
 ORDER BY total_worker_time DESC OPTION (RECOMPILE); 
 ------
 
+/*
+INPUT BUFFER
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/bc7f2ae6-b31f-45f7-9c4a-18f83ec16d7d
 
--- Helps you investigate scalar UDF performance issues
+- show the last query for each SPID that is connected to the DB
+- provides useful performance metrics for each SPID
+- it is useful to get a QUICK OVERVIEW of THE CURRENT WORKLOAD on the DB
+- use ORDER BY clause to focus on a specific area
+- use WHERE clause to filter the rsults
+- help identify resources of LONG RUNNING QUERIES that are still executing
+- 
 
--- sys.dm_exec_function_stats (Transact-SQL)
--- https://bit.ly/2q1Q6BM
-
-
-
-
-
-
+*/
 
 -- Get input buffer information for the current database (Query 3) (Input Buffer)
 SELECT es.session_id, DB_NAME(es.database_id) AS [Database Name],
