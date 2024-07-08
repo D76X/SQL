@@ -47,13 +47,6 @@ https://learn.microsoft.com/en-us/shows/azure-friday/azure-sql-database-non-bloc
 
 */
 
----------------------------------------------------------------
-
-/*
-Lock Waits for the current DB
-
-
-*/
 
 -- Get lock waits for current database (Query 1) (Lock Waits)
 SELECT o.name AS [table_name], i.name AS [index_name], ios.index_id, ios.partition_number,
@@ -74,10 +67,18 @@ HAVING SUM(ios.page_lock_wait_in_ms)+ SUM(row_lock_wait_in_ms) > 0
 ORDER BY total_lock_wait_in_ms DESC OPTION (RECOMPILE);
 ------
 
+/*
+SCALER UDF STATS
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/6ff91716-89f2-4f84-8b81-d543dd63c4cb
+
+- Scaler UDF are known to cause performance problems for SQL Server ( especially SQL Server 2017 and eralier!)
+- for the current DB show the most CPU intensive Scaler User Defined Functions
+
+*/
+
 -- This query is helpful for troubleshooting blocking and deadlocking issues
-
-
 -- Look at UDF execution statistics (Query 2) (UDF Statistics)
+
 SELECT OBJECT_NAME(object_id) AS [Function Name], total_worker_time,
        execution_count, total_elapsed_time,  
        total_elapsed_time/execution_count AS [avg_elapsed_time],  
