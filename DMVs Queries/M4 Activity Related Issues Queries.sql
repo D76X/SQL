@@ -116,7 +116,11 @@ https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0
 - use ORDER BY clause to focus on a specific area
 - use WHERE clause to filter the rsults
 - help identify resources of LONG RUNNING QUERIES that are still executing
-- 
+
+-- Gives you input buffer information from all non-system sessions for the current database
+-- Replaces DBCC INPUTBUFFER
+-- New DMF for retrieving input buffer in SQL Server
+-- https://bit.ly/2uHKMbz 
 
 */
 
@@ -131,15 +135,30 @@ AND es.session_id > 50
 AND es.session_id <> @@SPID OPTION (RECOMPILE);
 ------
 
--- Gives you input buffer information from all non-system sessions for the current database
--- Replaces DBCC INPUTBUFFER
+/*
+QUERY EXECUTION COUNTS (QEC)
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/815cda7a-52e4-406b-851b-b0aadaef268e
 
--- New DMF for retrieving input buffer in SQL Server
--- https://bit.ly/2uHKMbz
+------------------------------------------------------------------------------
+- QEC helps to undestand which queries are the most often executed queries!
+
+A common performance scenario is whennew queries are available that were not
+run in the past and the overall performance has been inpacted by these newly
+deplyed queries.
+
+This means that the DB BASELINE HAS CHANGED!
+------------------------------------------------------------------------------
+- all frequently executed queries SHOULD BE OPTIMIZED FIRST!
+- all frequently executed queries ARE GOOD CANDIDATEs for CACHING either in teh middle-tier or in the client
+- if a query is executed too often it may be an indication of a logic mistake in one of the application layers 
+i.e. the query is invoked multiple times when a view is open in the client.
 
 
+- most currently executed queries for the current DB this includes ALL uqeries that is SP, etc.
+- LOOK FOR the **Has Index Missing** column that signals that there is a MISSING INDEX WARNING in the Query Plan Cache for that query
+- LOOK AT the Graphical Execution Plan (GEP) for Insights 
 
-
+*/
 
 -- Get most frequently executed queries for this database (Query 4) (Query Execution Counts)
 SELECT TOP(50) LEFT(t.[text], 50) AS [Short Query Text], qs.execution_count AS [Execution Count],
