@@ -179,7 +179,8 @@ ORDER BY qs.execution_count DESC OPTION (RECOMPILE);
 ------
 
 
-
+-- https://dynamicsax-silverbullet.blogspot.com/2020/07/batch-management-service-cannot-be.html
+update SQLSYSTEMVARIABLES SET VALUE = 0 where PARM = 'CONFIGURATIONMODE'
 
 -- Top Cached SPs By Execution Count (Query 5) (SP Execution Counts)
 SELECT TOP(100) p.name AS [SP Name], qs.execution_count AS [Execution Count],
