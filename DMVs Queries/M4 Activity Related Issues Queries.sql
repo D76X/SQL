@@ -176,12 +176,13 @@ CROSS APPLY sys.dm_exec_sql_text(plan_handle) AS t
 CROSS APPLY sys.dm_exec_query_plan(plan_handle) AS qp 
 WHERE t.dbid = DB_ID()
 ORDER BY qs.execution_count DESC OPTION (RECOMPILE);
-------
 
-
--- https://dynamicsax-silverbullet.blogspot.com/2020/07/batch-management-service-cannot-be.html
-update SQLSYSTEMVARIABLES SET VALUE = 0 where PARM = 'CONFIGURATIONMODE'
-
+--------------------------------------------------------------------------------------------------------------
+/*
+SP Execution Count (SPEC)
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/006a5cf5-8d2e-4471-b1c5-59d1c707203c
+Similar to the QUERY EXECUTION COUNTS (QEC)
+*/
 -- Top Cached SPs By Execution Count (Query 5) (SP Execution Counts)
 SELECT TOP(100) p.name AS [SP Name], qs.execution_count AS [Execution Count],
 ISNULL(qs.execution_count/DATEDIFF(Minute, qs.cached_time, GETDATE()), 0) AS [Calls/Minute],
@@ -199,12 +200,40 @@ CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp
 WHERE qs.database_id = DB_ID()
 AND DATEDIFF(Minute, qs.cached_time, GETDATE()) > 0
 ORDER BY qs.execution_count DESC OPTION (RECOMPILE);
-------
+
+---------------------------------------------------------------------------------------
+
+/*
+SP Avg Elapsed Time
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/3ecc003b-efe5-4438-b5df-ff4eea5874c4
+
+-1 shows the Cached SP ordered by the Avg Execyution Time (AET) in microseconds
+-2 look for large differences between the min AET and the max AET
+
+----------------------------
+dAET = (maxAET - minAET)
+----------------------------
+
+When dAET is large it may indicate one of the following 
+
+*****************************************************************************************
+-3: <HAS MISSING INDEX> warning
+that the SP may have <HAS MISSING INDEX> warning in its Cached Plan!
+*****************************************************************************************
+-4 : Bad CQP tsability
+
+there is a PROBLEM WITH THE Cached Query Plan CQP stability that is it may be succeptible 
+to large varuiance because of one or more of its parameters.
+This could mean that for some sets of Params there are good CQPs but for some other sets
+of Params there may be inefficient CQPs.
+*****************************************************************************************
+
+-5 inspect the Graphical Execution Plan (GEP) to understand the cost factors for the SP
+*/
+
 
 -- Tells you which cached stored procedures are called the most often
 -- This helps you characterize and baseline your workload
-
-
 
 -- Top Cached SPs By Avg Elapsed Time (Query 6) (SP Avg Elapsed Time)
 SELECT TOP(25) p.name AS [SP Name], qs.min_elapsed_time, 
@@ -224,13 +253,38 @@ CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp
 WHERE qs.database_id = DB_ID()
 AND DATEDIFF(Minute, qs.cached_time, GETDATE()) > 0
 ORDER BY avg_elapsed_time DESC OPTION (RECOMPILE);
-------
+
+---------------------------------------------------------------------------------------------
+
+/*
+BAD NON-CLUSTERED INDEXES (BNC-IDX)
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/126d9197-d461-42ae-be72-d8e2c7cf4a40
+
+The following is a summary of what defines a BAD NON-CLUSTERED INDEXES
+
+-1 
+has far more writes that reads: these are not very useful because you have the cost
+of having to maintain the index which in turn is used only in a relatively few read
+statements
+
+-2 
+has far more writes that reads: must be often updated by the server! 
+
+-3 unused indexes increse the BD size thus the cost and the aintenance workflow
+
+**************************************
+-4 IMPORTANT:
+**************************************
+Do not remove indexes that are detected as BNC-IDX without scripting them out first
+and storing the script in Source Control. 
+It may happen that indeed these NC-IDX are legittimate in that they are used only
+sparingly to create reports such as ANNUAL reports with heavy queries.
+In this case these indexes may be required for the heavy query to succeed when they
+are run.
+*/
 
 -- This helps you find high average elapsed time cached stored procedures that
 -- may be easy to optimize with standard query tuning techniques
-
-
-
 -- Possible Bad NC Indexes (writes > reads)  (Query 7) (Bad NC Indexes)
 SELECT SCHEMA_NAME(o.[schema_id]) AS [Schema Name], 
 OBJECT_NAME(s.[object_id]) AS [Table Name],
