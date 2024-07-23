@@ -304,14 +304,36 @@ AND s.user_updates > (s.user_seeks + s.user_scans + s.user_lookups)
 AND i.index_id > 1 AND i.[type_desc] = N'NONCLUSTERED'
 AND i.is_primary_key = 0 AND i.is_unique_constraint = 0 AND i.is_unique = 0
 ORDER BY [Difference] DESC, [Total Writes] DESC, [Total Reads] ASC OPTION (RECOMPILE);
-------
+
+
+-----------------------------------------------------------------------------------------------------
+
+/*
+
+MISSING INDEXES (for the current DB)
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/02605ed9-aa61-4fde-ac65-fbd6486720b8
+
+-1 WARNING: this query can be very easily misinterpreted 
+-2 this looks at the output of the QUERY OPTIMIZER (QO) and see whether it advices to add indexes to improve a certain query
+-3 be careful to add indexes just because the QO asks you to do so as this may leand to OVER INDEXING the DB which 
+-4 pay particular attention to the following columns
+----------------------------------------------------
+last_user_seek: 
+indicates the last time that the QO falgs this index as required, if it iupdates oftne this is a query part of your regular workload
+
+user_seeks:
+counts how may ttimes the QO has asked for this new index
+
+avg_toltal_user_cost:
+it computes the overall cost caused by the missing index on the table
+----------------------------------------------------
+
+
+*/
 
 -- Look for indexes with high numbers of writes and zero or very low numbers of reads
 -- Consider your complete workload, and how long your instance has been running
 -- Investigate further before dropping an index!
-
-
-
 -- Missing Indexes for current database by Index Advantage  (Query 8) (Missing Indexes)
 SELECT DISTINCT CONVERT(decimal(18,2), user_seeks * avg_total_user_cost * (avg_user_impact * 0.01)) 
 AS [index_advantage], 
@@ -328,6 +350,7 @@ INNER JOIN sys.partitions AS p WITH (NOLOCK)
 ON p.[object_id] = mid.[object_id]
 WHERE mid.database_id = DB_ID() 
 ORDER BY index_advantage DESC OPTION (RECOMPILE);
+
 ------
 
 -- Look at index advantage, last user seek time, number of user seeks to help determine source and importance
