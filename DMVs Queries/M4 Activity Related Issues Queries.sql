@@ -328,6 +328,32 @@ avg_toltal_user_cost:
 it computes the overall cost caused by the missing index on the table
 ----------------------------------------------------
 
+-5 index_advantage + avg_user_inpact
+avg_user_inpact 
+avg_total_user_cost
+
+the table is ordered by index_advantage but you ought to consider this together with the columns
+that give the stats about the frequency with which the query is used including when it was last 
+run.
+
+avg_user_inpact 
+expresses the % of performance improvment that could be achived by introducing the missing index.
+
+avg_total_user_cost
+expresses the RELATIVE cost of not having the suggested index.
+
+-6 equality_colums , inequality_columns, included_columns
+
+If you decide to indeed add the index add it based on the suggestion of the columns 
+indicated by equality_colums first, then inequality_columns and finally included_columns.
+
+The order in which the columns are provided by this DMV might not always be the best to 
+attain the performance improvement and you would have to try to find the right order 
+experimentally.
+
+
+
+
 
 */
 
