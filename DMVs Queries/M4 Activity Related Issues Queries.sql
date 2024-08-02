@@ -350,11 +350,6 @@ indicated by equality_colums first, then inequality_columns and finally included
 The order in which the columns are provided by this DMV might not always be the best to 
 attain the performance improvement and you would have to try to find the right order 
 experimentally.
-
-
-
-
-
 */
 
 -- Look for indexes with high numbers of writes and zero or very low numbers of reads
@@ -378,13 +373,32 @@ WHERE mid.database_id = DB_ID()
 ORDER BY index_advantage DESC OPTION (RECOMPILE);
 
 ------
+/*
+MIXED INDEX WARNINGS
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/9c261b0f-35f4-4292-b0da-924cf4e367f1
+
+-1 finds the MISING INDEX WARNINGS LISTED IN THE QUERY CACHE
+
+*****************************************************************************************
+-2 WARNING!
+this query may take a long time if you have a very active database with a long cache!
+
+For example, it took ** 42 secs ** on dev701584772B-1 !
+
+*****************************************************************************************
+
+-3 it associates the MIWs with the corresponding offending SP & Query and provides 
+details about the tables and columns on which the index is missing.
+It also provides the corresponding EXECUTION PLAN that you may use to design the optimization.
+
+-4 [Usecounts]
+provides how often that SP/Query is used.
+
+*/
 
 -- Look at index advantage, last user seek time, number of user seeks to help determine source and importance
 -- SQL Server is overly eager to add included columns, so beware
 -- Do not just blindly add indexes that show up from this query!!!
-
-
-
 -- Find missing index warnings for cached plans in the current database  (Query 9) (Missing Index Warnings)
 -- Note: This query could take some time on a busy instance
 SELECT TOP(25) OBJECT_NAME(objectid) AS [ObjectName], 
@@ -396,15 +410,16 @@ AND dbid = DB_ID()
 ORDER BY cp.usecounts DESC OPTION (RECOMPILE);
 ------
 
+/*
+
+OVERALL INDEX USAGE FOR READS
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/7a457e3f-8596-4a2e-8da0-19ef1a4cb5e9
+
+-1
+
+*/
 -- Helps you connect missing indexes to specific stored procedures or queries
 -- This can help you decide whether to add them or not
-
-
-
-
-
-
-
 
 --- Index Read/Write stats (all tables in current DB) ordered by Reads  (Query 10) (Overall Index Usage - Reads)
 SELECT OBJECT_NAME(i.[object_id]) AS [ObjectName], i.[name] AS [IndexName], i.index_id, 
