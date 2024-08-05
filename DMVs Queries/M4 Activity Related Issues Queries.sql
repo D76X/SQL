@@ -415,7 +415,27 @@ ORDER BY cp.usecounts DESC OPTION (RECOMPILE);
 OVERALL INDEX USAGE FOR READS
 https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/7a457e3f-8596-4a2e-8da0-19ef1a4cb5e9
 
--1
+-1 finds which indexes in the current DB have the most reads and therefore it helps understand your workload
+-2 index reads are VERY beneficial for SELECT query performance i.e. reporting workloads
+-------------------------------------------------------------------------------
+-3 THE INDEX WITH THE HIGHER READS ARE GOOD CANDIDATES FOR DATA COMPRESSION!
+
+DATA COMPRESSIONS
+https://learn.microsoft.com/en-us/sql/relational-databases/data-compression/data-compression?view=sql-server-ver16
+
+ROW COMPRESSION
+https://learn.microsoft.com/en-us/sql/relational-databases/data-compression/row-compression-implementation?view=sql-server-ver16
+
+PAGE COMPRESSION
+https://learn.microsoft.com/en-us/sql/relational-databases/data-compression/page-compression-implementation?view=azuresqldb-current
+-------------------------------------------------------------------------------
+
+-4 COLUMNS with high reads can be COLUMNSTORE INDEX candidates
+https://learn.microsoft.com/en-us/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver16
+
+-5 
+provides the CUMULATIVE METRICS for all row-store indexes in the current DB
+that gives an idea of which tables & indexes see the highest reading activity
 
 */
 -- Helps you connect missing indexes to specific stored procedures or queries
@@ -437,11 +457,23 @@ WHERE OBJECTPROPERTY(i.[object_id],'IsUserTable') = 1
 ORDER BY s.user_seeks + s.user_scans + s.user_lookups DESC OPTION (RECOMPILE); -- Order by reads
 ------
 
+/*
+
+OVERALL INDEX USAGE FOR WRITES
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/f6e91ee8-b23a-4efc-a611-0d4aa330bf49
+
+-1 finds which indexes in the current DB have the most WRITES and therefore it helps understand your workload from an I/O perspective
+-2 INDEX WRITES ARE BAD for UPDATE / INSERT query performance!
+-3 for those workloads that have many more writes than reads you may decide to DROP the index
+-4 
+pay attention to the fact that often this kind of situation is for REPORTING workloads 
+which may need the index even if they are only occasionally run i.e. quorterly, yearly, etc. 
+
+-5 returns the **cumulative metrics for all row-store indexes** in the current DB
+
+*/
+
 -- Show which indexes in the current database are most active for Reads
-
-
-
-
 --- Index Read/Write stats (all tables in current DB) ordered by Writes  (Query 11) (Overall Index Usage - Writes)
 SELECT OBJECT_NAME(i.[object_id]) AS [ObjectName], i.[name] AS [IndexName], i.index_id,
 	   s.user_updates AS [Writes], s.user_seeks + s.user_scans + s.user_lookups AS [Total Reads], 
@@ -453,15 +485,29 @@ ON i.[object_id] = s.[object_id]
 AND i.index_id = s.index_id
 AND s.database_id = DB_ID()
 WHERE OBJECTPROPERTY(i.[object_id],'IsUserTable') = 1
-ORDER BY s.user_updates DESC OPTION (RECOMPILE);						 -- Order by writes
-------
+ORDER BY s.user_updates DESC OPTION (RECOMPILE); -- Order by writes
 
+----------------------------------------------------------------------------------------------
 
+/*
+VOLATILE INDEXES
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/68d1a0b3-d8a0-443a-bba5-9a3cf267dda7
 
+-1 shows which indezes and statistics for the current db have the most updates
+-2 helps undestand the RIGHTS workload
+-3 helps undestand which service level your Azure DB should be in order to handle the workload
+-4 on all VOALTILE tables be cautious with: 
+> creating indexes as it may slow down writes considerably
+> data compression for the same reason
 
+-5 ON-PREM use FLASH STORAGE or NON-PARITY RAID levels for volitile data
+https://learn.microsoft.com/en-us/sharepoint/administration/storage-and-sql-server-capacity-planning-and-configuration
 
+-6 in Azure it is the service tier that determines the underlying hardware!
+if you have lots of volitile tables with writes then you might need to upgrade the 
+service tier as more I/O power is required in these cases.
 
-
+*/
 
 -- Look at most frequently modified indexes and statistics (Query 12) (Volatile Indexes)
 SELECT o.[name] AS [Object Name], o.[object_id], o.[type_desc], s.[name] AS [Statistics Name], 
@@ -474,7 +520,31 @@ CROSS APPLY sys.dm_db_stats_properties(s.object_id, s.stats_id) AS sp
 WHERE o.[type_desc] NOT IN (N'SYSTEM_TABLE', N'INTERNAL_TABLE')
 AND sp.modification_counter > 0
 ORDER BY sp.modification_counter DESC, o.name OPTION (RECOMPILE);
-------
+
+----------------------------------------------------------------------------------------------
+
+/*
+
+RECENT RESOURCE USAGE
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/99d167ee-e83f-46a4-a6c4-b9fe8eb9b8cf 
+
+********************************************************************************
+-1 it shows a snapshot of DATA EVERY 15 SECONDS AND IT GOES BACK 64 MINUTES!
+********************************************************************************
+-2 it is ** very recent ** snapshot of what is going on the DB
+***************************************************************************************************************************
+-3 ALL its column report %USAGE i.e CPU, MEMORY, etc. these % values are AGAINST THE LIMITs offered by your service tier!
+***************************************************************************************************************************
+
+-4 it shows also the AGV_IO_% & AVG_LOG_WRITE_%
+
+
+-5 it can be used to validate whether the DB is in the right service tier
+if you max out on one or more of the columns then you need one of the following:
+> some tuning 
+> upgrade the service tier
+
+*/
 
 -- This helps you understand your workload and make better decisions about 
 -- things like data compression and adding new indexes to a table
