@@ -528,6 +528,12 @@ ORDER BY sp.modification_counter DESC, o.name OPTION (RECOMPILE);
 RECENT RESOURCE USAGE
 https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/99d167ee-e83f-46a4-a6c4-b9fe8eb9b8cf 
 
+**************************************
+THIS IS A Azure SQL DB Specific Query
+it does not apply to on-prem versions
+https://app.pluralsight.com/ilx/video-courses/97737eb6-d4fe-4add-bf29-5c5c528ef0c3/55f67122-5d83-4211-ad8d-aeb0256831a5/28935242-ba02-449d-b9e9-3f679b988d5e
+**************************************
+
 ********************************************************************************
 -1 it shows a snapshot of DATA EVERY 15 SECONDS AND IT GOES BACK 64 MINUTES!
 ********************************************************************************
@@ -548,11 +554,6 @@ if you max out on one or more of the columns then you need one of the following:
 
 -- This helps you understand your workload and make better decisions about 
 -- things like data compression and adding new indexes to a table
-
-
-
-
-
 
 -- Get recent resource usage (Query 13) (Recent Resource Usage)
 SELECT end_time, dtu_limit, cpu_limit, avg_cpu_percent, avg_memory_usage_percent, 
